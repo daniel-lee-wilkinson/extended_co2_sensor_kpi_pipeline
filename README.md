@@ -1,8 +1,12 @@
-# Data Pipeline for IoT Sensor Data (Direct Air Capture Example)
+# Data Pipeline for IoT Sensor Data (Industrial Process Example)
+
+This repository demonstrates generic IoT data pipeline patterns with synthetic/placeholder naming. It does not contain company data.
 
 ## 1. Overview
 
-This project implements a modular, fault-tolerant pipeline for processing IoT sensor data. It demonstrates core data engineering practices:  
+This project implements a modular, fault-tolerant pipeline for processing IoT sensor data from an industrial process environment. As an example, the pipeline is framed around direct air capture operations, but all data and sensor names are illustrative only.
+
+It demonstrates core data engineering practices:
 
 1. **Automated** – scheduled to run daily at a fixed time  
 2. **Reproducible** – each step is deterministic and idempotent  
@@ -69,16 +73,16 @@ pip install -r requirements.txt
 
 ## 5. KPI Units
 
-All KPIs are stored in **SI-based units**. Examples:  
+All KPIs are stored in **SI-based units**. Sensor names are generic placeholders (e.g., flow_rate, concentration_sensor_A) to illustrate the methodology. Example KPIs:  
 
 | KPI column name                    | Unit      | Notes                                      |
 | ---------------------------------- | --------- | ------------------------------------------ |
-| `Power consumption total`          | kWh       | Total cycle energy                         |
+| `Total power consumption`          | kWh       | Total cycle energy                         |
 | `Mass CO₂ process`                 | t CO₂     | Tonnes CO₂ captured per cycle               |
 | `Energy per mass CO₂`              | kWh/t CO₂ | Specific energy consumption                 |
 | `Mean temperature adsorption`      | °C        | Average during adsorption                   |
-| `Mean CO₂ concentration adsorption`| ppm       | Sensor CR1                                 |
-| `CO₂ mass flow`                    | kg/s      | Instantaneous flow = FR1 × CR1 / 100        |
+| `Mean CO₂ concentration adsorption`| ppm       | concentration_sensor_A                                 |
+| `CO₂ mass flow`                    | kg/s      | Instantaneous flow = flow_rate × concentration_sensor_A / 100        |
 
 ---
 
