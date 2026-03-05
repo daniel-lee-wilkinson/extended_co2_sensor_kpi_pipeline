@@ -3,9 +3,11 @@
 ![Language: Python](https://img.shields.io/badge/Language-Python%203.11-blue?logo=python)
 ![Database: SQLite](https://img.shields.io/badge/Database-SQLite-grey?logo=sqlite)
 ![Library: pandas](https://img.shields.io/badge/Library-pandas-green?logo=pandas)
-![Scheduling: Windows Task Scheduler](https://img.shields.io/badge/Scheduling-Task%20Scheduler%20%7C%20cron%2FAirflow-lightgrey)
+![Scheduling: Windows Task Scheduler](https://img.shields.io/badge/Scheduling-Windows%20Task%20Scheduler-lightgrey)
 ![Output: Excel](https://img.shields.io/badge/Output-Excel-lightblue?logo=microsoft-excel)
 ![Library: requests](https://img.shields.io/badge/Library-requests-green)
+![Tests: pytest (69)](https://img.shields.io/badge/Tests-pytest%20(69)-brightgreen)
+![Data Quality: in-pipeline checks](https://img.shields.io/badge/Data_Quality-in--pipeline-blueviolet)
 
 This repository demonstrates generic IoT data pipeline patterns with synthetic/placeholder naming. It does not contain company data.
 
@@ -36,8 +38,8 @@ Each run of the pipeline:
 ```
 project_root/
 ├─ code/                 # all .py source files
-│   ├─ fetch_all.py       # fetch raw data → raw_data/*.db
-│   ├─ faster_cleaning.py # clean/split → cleaned_data/*.db
+│   ├─ fetch.py       # fetch raw data → raw_data/*.db
+│   ├─ clean.py # clean/split → cleaned_data/*.db
 │   ├─ kpi_calc.py        # calculate KPIs → results/*.xlsx and kpi_results.db
 │   ├─ config.py          # .env credentials, date range, metric list
 │   └─ run_all.py         # driver – RUN THIS CODE
@@ -100,7 +102,7 @@ All KPIs are stored in **SI-based units**. Sensor names are generic placeholders
 ```mermaid
 flowchart LR
     A[API Fetch] -->|raw sensor data| B[Raw DBs<br/>raw_data/]
-    B --> C[Cleaning & Splitting<br/>faster_cleaning.py]
+    B --> C[Cleaning & Splitting<br/>clean.py]
     C -->|cleaned cycles| D[Cleaned DBs<br/>cleaned_data/]
     D --> E[KPI Calculation<br/>kpi_calc.py]
     E -->|per-cycle KPIs| F[Excel Reports]
@@ -125,11 +127,11 @@ flowchart LR
    - If one step fails for a date, processing stops for that date but continues for others.  
 
 3. **Fetch raw data**  
-   - `fetch_all.py` retrieves API data for each unit.  
+   - `fetch.py` retrieves API data for each unit.  
    - Skips existing unit/day files, weekends, and out-of-window hours.  
 
 4. **Clean**  
-   - `faster_cleaning.py` removes incomplete readings, clips sensor spikes, and splits cycles.  
+   - `clean.py` removes incomplete readings, clips sensor spikes, and splits cycles.  
    - Results saved as `<date>_UnitX_ProcessData.db` in `cleaned_data/`.  
 
 5. **Calculate KPIs**  
@@ -160,6 +162,12 @@ python run_all.py --dry-run
 - Per-unit Excel files with KPIs  
 - Consolidated SQLite database `kpi_results.db`  
 
+For example (dummy data): 
+
+| date       | unit   | mass_co2_t | energy_kwh_per_t | compliant |
+|------------|--------|------------|------------------|-----------|
+| 2024-03-01 | Unit_A | 1.24       | 412.3            | Y        |
+| 2024-03-01 | Unit_B | 0.98       | 438.7            | Y        |
 ---
 
 ## 9. Troubleshooting
@@ -187,13 +195,28 @@ python run_all.py --dry-run
 - **Validation**: Negative/NaN checks, cross-checks against raw data, daily totals validated.  
 
 ---
+## 12. Testing & Data Quality
 
-## 12. Notes on scheduling
+The pipeline includes two layers of validation:
 
-This project demonstrates scheduling with **Windows Task Scheduler**. In production, the same orchestration could run under **cron, Airflow, Prefect, or Dagster** for scalability.  
+**pytest suite** covering pipeline logic:
+- Fetch: skip logic for existing files, weekends, and out-of-window hours
+- Cleaning: spike clipping, cycle splitting, incomplete reading detection
+- KPI calculation: expected output ranges, NaN/negative checks
+- Factor assignment: raw value → process name mapping correctness
+
+**In-pipeline data quality checks** running on every execution:
+- KPI sanity checks: values validated against physically expected ranges
+- Outlier detection: statistical flags written directly to the results database
+- Cross-validation: daily totals checked against raw sensor readings
+- Flagging: anomalous cycles are marked in `kpi_results.db` rather than silently dropped
+---
+## 13. Notes on scheduling
+
+This pipeline is orchestrated via **Windows Task Scheduler**, appropriate for the single-machine, daily-batch context it was built for. The modular `run_all.py` driver is portable. The same logic could be wrapped in cron, Airflow, or Dagster without changing the underlying pipeline code.
 
 ---
 
-## 13. Licence
+## 14. Licence
 
 For demonstration purposes only.  
