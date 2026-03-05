@@ -1,10 +1,19 @@
 # Data Pipeline for IoT Sensor Data (Industrial Process Example)
 
+![Language: Python](https://img.shields.io/badge/Language-Python%203.11-blue?logo=python)
+![Database: SQLite](https://img.shields.io/badge/Database-SQLite-grey?logo=sqlite)
+![Library: pandas](https://img.shields.io/badge/Library-pandas-green?logo=pandas)
+![Scheduling: Windows Task Scheduler](https://img.shields.io/badge/Scheduling-Task%20Scheduler%20%7C%20cron%2FAirflow-lightgrey)
+![Output: Excel](https://img.shields.io/badge/Output-Excel-lightblue?logo=microsoft-excel)
+![Library: requests](https://img.shields.io/badge/Library-requests-green)
+
 This repository demonstrates generic IoT data pipeline patterns with synthetic/placeholder naming. It does not contain company data.
 
 ## 1. Overview
 
 This project implements a modular, fault-tolerant pipeline for processing IoT sensor data from an industrial process environment. As an example, the pipeline is framed around direct air capture operations, but all data and sensor names are illustrative only.
+
+Originally built for daily operations at an industrial CO₂ capture facility, this pipeline processed **20GB of sensor data** across multiple capture units, calculating 30+ engineering KPIs per cycle to support leadership reporting and performance evaluation.
 
 It demonstrates core data engineering practices:
 
