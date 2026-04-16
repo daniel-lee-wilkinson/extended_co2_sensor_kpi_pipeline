@@ -19,12 +19,12 @@ Originally built for daily operations at an industrial CO₂ capture facility, t
 
 It demonstrates core data engineering practices:
 
-1. **Automated** – scheduled to run daily at a fixed time  
-2. **Reproducible** – each step is deterministic and idempotent  
-3. **Incremental** – previously processed files are skipped automatically  
-4. **Robust** – partial failures do not stop the entire pipeline  
-5. **Maintainable** – source code is separated by function (fetch → clean → calculate)  
-6. **Traceable** – logs and checkpoints provide transparency and easy debugging  
+1. **Automated** – Scheduled daily batch processing via Windows Task Scheduler.
+2. **Idempotent** – Deterministic logic allows safe re-runs without data duplication.
+3. **Multi-Stage Incrementalism** – Checks state at each phase (Raw/Clean/Calc) to skip redundant processing.
+4. **Fault Isolation** – Unit-level failures are isolated to prevent total pipeline halts.
+5. **Modular** – Decoupled logic for Ingestion, Transformation, and Analytics engineering.
+6. **Observability** – Structured logging and metadata tracking for system health.
 
 Each run of the pipeline:  
 1. **fetches** time-series sensor data via API  
@@ -117,32 +117,23 @@ flowchart LR
     I --> C
     I --> E
 ```
+**State Verification**
 
-1. **Determine target day**  
-   - `run_all.py` checks Excel result files in `results/` to identify the latest processed date.  
-   - Weekends are skipped.  
+- run_all.py performs a multi-stage check to identify the "Delta" (new data).
 
-2. **Run pipeline components**  
-   - Steps are executed sequentially via `subprocess.run()`: fetch → clean → calculate.  
-   - If one step fails for a date, processing stops for that date but continues for others.  
+- Skip Logic: Data is not extracted if a Raw DB exists, not cleaned if a Cleaned DB exists, and not recalculated if entries exist in the Final DB.
 
-3. **Fetch raw data**  
-   - `fetch.py` retrieves API data for each unit.  
-   - Incremental ingestion, skips existing unit/day files, weekends, and out-of-window hours.  
+**Orchestration & Failure Propagation**
 
-4. **Clean**  
-   - `clean.py` removes incomplete readings, clips sensor spikes, removes duplicates and splits cycles.  
-   - Results saved as `<date>_UnitX_ProcessData.db` in `cleaned_data/`.  
+- Steps execute sequentially via subprocess.run().
 
-5. **Calculate KPIs**  
-   - `kpi_calc.py` computes 30+ KPIs per cycle.  
-   - Results are written to per-unit Excel files and the consolidated SQLite database `kpi_results.db`.  
-   - Skips already processed unit/day files.  
+- The orchestrator captures non-zero exit codes; if a unit fails a specific stage, it is logged and the orchestrator moves to the next unit.
 
-6. **Logging and checkpoints**  
-   - Each run creates timestamped logs in `logs/`.  
-   - Logs capture orchestration, runtimes, warnings, and errors.  
+**Fetch (Ingestion)**
 
+- Retrieves time-series data in 30-minute slices.
+- Applies domain filtering to exclude non-operational windows (weekends/off-hours).
+  
 ---
 
 ## 7. Quickstart
@@ -182,10 +173,12 @@ For example (dummy data):
 
 ## 10. Robustness
 
-- Raw data files are retained but can be deleted once cleaned equivalents are validated.
-- Granular Fault Isolation: The orchestrator (run_all.py) is designed so that execution is decoupled at the unit level.
-- If `kpi_results.db` is corrupted, delete it and rerun — it will be regenerated in full.  
+- Multi-Stage Resumption: If the pipeline is interrupted, it resumes from the last successful stage (Extraction, Cleaning, or Calculation) rather than restarting the entire daily batch.
 
+- Atomic Unit Processing: Each unit-day pair is processed as an isolated transaction, ensuring that a single sensor failure does not impact the availability of data for other units.
+
+- Data Integrity Gates: In-pipeline checks prevent "poison pill" data (e.g., sensor spikes or negatives) from propagating into the final KPI database.
+- 
 ---
 
 ## 11. Methodology
