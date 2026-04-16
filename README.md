@@ -128,10 +128,10 @@ flowchart LR
 
 3. **Fetch raw data**  
    - `fetch.py` retrieves API data for each unit.  
-   - Skips existing unit/day files, weekends, and out-of-window hours.  
+   - Incremental ingestion, skips existing unit/day files, weekends, and out-of-window hours.  
 
 4. **Clean**  
-   - `clean.py` removes incomplete readings, clips sensor spikes, and splits cycles.  
+   - `clean.py` removes incomplete readings, clips sensor spikes, removes duplicates and splits cycles.  
    - Results saved as `<date>_UnitX_ProcessData.db` in `cleaned_data/`.  
 
 5. **Calculate KPIs**  
@@ -182,7 +182,8 @@ For example (dummy data):
 
 ## 10. Robustness
 
-- Raw data files are retained but can be deleted once cleaned equivalents are validated.  
+- Raw data files are retained but can be deleted once cleaned equivalents are validated.
+- Granular Fault Isolation: The orchestrator (run_all.py) is designed so that execution is decoupled at the unit level.
 - If `kpi_results.db` is corrupted, delete it and rerun — it will be regenerated in full.  
 
 ---
