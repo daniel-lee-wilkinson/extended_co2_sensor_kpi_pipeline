@@ -177,8 +177,7 @@ For example (dummy data):
 
 - Atomic Unit Processing: Each unit-day pair is processed as an isolated transaction, ensuring that a single sensor failure does not impact the availability of data for other units.
 
-- Data Integrity Gates: In-pipeline checks prevent "poison pill" data (e.g., sensor spikes or negatives) from propagating into the final KPI database.
-- 
+- Data Integrity Gates: In-pipeline checks prevent "poison pill" data (e.g., sensor spikes or negatives) from propagating into the final KPI database. 
 ---
 
 ## 11. Methodology
