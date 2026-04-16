@@ -6,7 +6,7 @@
 ![Scheduling: Windows Task Scheduler](https://img.shields.io/badge/Scheduling-Windows%20Task%20Scheduler-lightgrey)
 ![Output: Excel](https://img.shields.io/badge/Output-Excel-lightblue?logo=microsoft-excel)
 ![Library: requests](https://img.shields.io/badge/Library-requests-green)
-![Tests: pytest (69)](https://img.shields.io/badge/Tests-pytest%20(69)-brightgreen)
+![Tests: pytest](https://img.shields.io/badge/Tests-pytest%20-brightgreen)
 ![Data Quality: in-pipeline checks](https://img.shields.io/badge/Data_Quality-in--pipeline-blueviolet)
 
 This repository demonstrates generic IoT data pipeline patterns with synthetic/placeholder naming. It does not contain company data.
